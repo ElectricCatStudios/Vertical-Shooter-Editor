@@ -39,7 +39,9 @@ function mainEditor:draw()
 	local printString = "camera position: " .. tostring(self.cameraPosition)
 	printString = printString .. "\nmousePosition: " .. tostring(self.mousePosition)
 	printString = printString .. "\nmouseSnap Position: " .. tostring(self.mousePositionSnap)
+	love.graphics.setColor(0,0,0)
 	love.graphics.print(printString, 16, 16)
+	love.graphics.setColor(255,255,255)
 end
 
 state:add("editor", mainEditor)

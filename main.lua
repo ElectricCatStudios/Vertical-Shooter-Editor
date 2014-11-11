@@ -16,6 +16,7 @@ spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
 -- constants
 CAMERA_SPEED = 5
+PROGRESSION_SPEED = 10
 
 function love.load()
 	state:set("editor")
