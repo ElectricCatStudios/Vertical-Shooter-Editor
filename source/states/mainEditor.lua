@@ -57,4 +57,14 @@ function mainEditor:draw()
 	love.graphics.setColor(255,255,255)
 end
 
+function mainEditor:keypressed(key, isrepeat)
+	if (key == 'g') then
+		if (self.gridMode == 32) then
+			self.gridMode = 64
+		else
+			self.gridMode = 32
+		end
+	end
+end
+
 state:add("editor", mainEditor)
