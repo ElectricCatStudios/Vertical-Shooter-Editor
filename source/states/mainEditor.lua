@@ -4,6 +4,7 @@ mainEditor.cameraPosition = Vector(0,0)
 mainEditor.mousePosition = Vector(0,0)
 mainEditor.mousePositionSnap = Vector(0,0)
 mainEditor.snapMode = 32
+mainEditor.gridMode = 64
 
 function mainEditor:init()
 
@@ -20,20 +21,28 @@ function mainEditor:update(dt)
 
 	-- mouse position
 	self.mousePosition = Vector(love.mouse.getPosition()) + self.cameraPosition
-	self.mousePositionSnap = Vector(roundTo(self.mousePosition.x,32,'nearest'),roundTo(self.mousePosition.y,32,'nearest'))
+	self.mousePositionSnap = Vector(roundTo(self.mousePosition.x,self.snapMode,'nearest'),roundTo(self.mousePosition.y,self.snapMode,'nearest'))
 end
 
 function mainEditor:draw()
-	local gridStart = self.cameraPosition - Vector(self.cameraPosition.x%32,self.cameraPosition.y%32)
+	local gridStart = self.cameraPosition - Vector(self.cameraPosition.x%self.gridMode,self.cameraPosition.y%self.gridMode)
+
 	-- non ui drawing
 	-- draw grid
 	love.graphics.translate(-self.cameraPosition.x, -self.cameraPosition.y)
-	local xTileNum = love.window.getWidth()/self.snapMode
-	local yTileNum = love.window.getHeight()/self.snapMode
-	print(xTileNum)
+	local xTileNum = love.window.getWidth()/self.gridMode
+	local yTileNum = love.window.getHeight()/self.gridMode
+	local sprite
+	if (self.gridMode == 32) then
+		sprite = spr_grid32
+	elseif (self.gridMode == 64) then
+		sprite = spr_grid64
+	else
+		error('invalid gridMode')
+	end
 	for i=0, xTileNum do
 		for j=0, yTileNum do
-			love.graphics.draw(spr_grid32, gridStart.x + 32*i, gridStart.y + 32*j)
+			love.graphics.draw(sprite, gridStart.x + self.gridMode*i, gridStart.y + self.gridMode*j)
 		end
 	end
 

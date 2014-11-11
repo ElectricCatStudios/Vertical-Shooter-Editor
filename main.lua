@@ -15,7 +15,7 @@ spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
 spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
 -- constants
-CAMERA_SPEED = 5
+CAMERA_SPEED = 4
 PROGRESSION_SPEED = 10
 
 function love.load()
