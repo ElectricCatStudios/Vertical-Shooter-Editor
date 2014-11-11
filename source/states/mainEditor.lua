@@ -3,6 +3,7 @@ local mainEditor = {}
 mainEditor.cameraPosition = Vector(0,0)
 mainEditor.mousePosition = Vector(0,0)
 mainEditor.mousePositionSnap = Vector(0,0)
+mainEditor.snapMode = 32
 
 function mainEditor:init()
 
@@ -27,8 +28,11 @@ function mainEditor:draw()
 	-- non ui drawing
 	-- draw grid
 	love.graphics.translate(-self.cameraPosition.x, -self.cameraPosition.y)
-	for i=0, 39 do
-		for j=0, 22 do
+	local xTileNum = love.window.getWidth()/self.snapMode
+	local yTileNum = love.window.getHeight()/self.snapMode
+	print(xTileNum)
+	for i=0, xTileNum do
+		for j=0, yTileNum do
 			love.graphics.draw(spr_grid32, gridStart.x + 32*i, gridStart.y + 32*j)
 		end
 	end
