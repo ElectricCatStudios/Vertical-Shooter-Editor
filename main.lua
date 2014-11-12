@@ -17,8 +17,10 @@ spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
 spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
 -- constants
-CAMERA_SPEED = 4
+CAMERA_SPEED = 250
 PROGRESSION_SPEED = 10
+TOOLPANE_WIDTH = 250
+TOOLBAR_HEIGHT = 32
 
 function love.load()
 	state:set("editor")
@@ -32,7 +34,6 @@ end
 
 function love.draw()
 	state:draw()
-	loveframes.draw()
 end
 
 function love.keypressed(key, unicode)
