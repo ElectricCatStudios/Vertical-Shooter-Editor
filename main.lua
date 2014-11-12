@@ -84,20 +84,31 @@ function setupUI()
 	toolbar:update(0)
 
 	-- cameraField
-	-- x
+	local function onFocus(object)
+		object:SetText("")
+	end
+	-- x field
 	cameraFieldx = loveframes.Create("textinput")
 	cameraFieldx:SetWidth(50)
 	cameraFieldx:CenterWithinArea(46, 0, 96, TOOLBAR_HEIGHT)
 	cameraFieldx:SetFont(love.graphics.newFont(12))
 	cameraFieldx:SetEditable(true)
 	cameraFieldx:SetText(tostring(cameraPosition.x))
-	-- y
+	cameraFieldx.OnFocusGained = onFocus
+	cameraFieldx.OnEnter = function(object)
+		cameraPosition.x = tonumber(object:GetText())
+	end
+	-- y field
 	cameraFieldy = loveframes.Create("textinput")
 	cameraFieldy:SetWidth(50)
 	cameraFieldy:CenterWithinArea(142, 0, 192, TOOLBAR_HEIGHT)
 	cameraFieldy:SetFont(love.graphics.newFont(12))
 	cameraFieldy:SetEditable(true)
 	cameraFieldy:SetText(tostring(cameraPosition.y))
+	cameraFieldy.OnFocusGained = onFocus
+	cameraFieldy.OnEnter = function(object)
+		cameraPosition.y = tonumber(object:GetText())
+	end
 end
 
 function drawGrid()
@@ -163,6 +174,10 @@ function setMousePosition()
 end
 
 function updateUI()
-	cameraFieldx:SetText(tostring(cameraPosition.x))
-	cameraFieldy:SetText(tostring(cameraPosition.y))
+	if (not cameraFieldx:GetFocus()) then
+		cameraFieldx:SetText(tostring(cameraPosition.x))
+	end
+	if (not cameraFieldy:GetFocus()) then
+		cameraFieldy:SetText(tostring(cameraPosition.y))
+	end
 end
