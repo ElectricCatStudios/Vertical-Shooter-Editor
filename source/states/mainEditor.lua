@@ -23,12 +23,20 @@ function mainEditor:init()
 	self.toolbar:update(0)
 
 	-- cameraField
-	self.cameraField = loveframes.Create("textinput")
-	self.cameraField:SetWidth(50)
-	self.cameraField:CenterWithinArea(45, 0, 95, TOOLBAR_HEIGHT)
-	self.cameraField:SetFont(love.graphics.newFont(12))
-	self.cameraField:SetEditable(true)
-	self.cameraField:SetText("lala")
+	-- x
+	self.cameraFieldx = loveframes.Create("textinput")
+	self.cameraFieldx:SetWidth(50)
+	self.cameraFieldx:CenterWithinArea(46, 0, 96, TOOLBAR_HEIGHT)
+	self.cameraFieldx:SetFont(love.graphics.newFont(12))
+	self.cameraFieldx:SetEditable(true)
+	self.cameraFieldx:SetText(tostring(self.cameraPosition.x))
+	-- y
+	self.cameraFieldy = loveframes.Create("textinput")
+	self.cameraFieldy:SetWidth(50)
+	self.cameraFieldy:CenterWithinArea(142, 0, 192, TOOLBAR_HEIGHT)
+	self.cameraFieldy:SetFont(love.graphics.newFont(12))
+	self.cameraFieldy:SetEditable(true)
+	self.cameraFieldy:SetText(tostring(self.cameraPosition.y))
 end
 
 function mainEditor:update(dt)
@@ -73,7 +81,8 @@ function mainEditor:draw()
 	love.graphics.translate(self.cameraPosition.x, self.cameraPosition.y)
 	loveframes.draw()
 	love.graphics.setColor(0,0,0)
-	love.graphics.print('Camera x:', 5, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.setColor(255,255,255)
 
 	-- drawing ui text
