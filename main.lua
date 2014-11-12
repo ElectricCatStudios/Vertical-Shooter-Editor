@@ -13,6 +13,8 @@ CAMERA_SPEED = 250			-- how fast the camera scrolls when user uses arrow keys
 PROGRESSION_SPEED = 10 		-- how fast the level will move forwards
 TOOLPANE_WIDTH = 250 		-- how wide the main tool pane is
 TOOLBAR_HEIGHT = 32			-- how tall the main toolbare is
+LEVEL_WIDTH = 64*10			-- the width of the level
+LEVEL_HEIGHT = 64*10		-- how for forwards the level goes
 
 -- globals
 cameraPosition = Vector(0,0)		-- the position of the top left corner of the screen (global coords)
@@ -30,6 +32,7 @@ function love.update(dt)
 	loveframes.update(dt)
 	setMousePosition()
 	cameraMovement(dt)
+	updateUI()
 end
 
 function love.draw()
@@ -104,6 +107,9 @@ function drawGrid()
 	local sprite 		-- the sprite to be tiled											
 
 	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
+	-- do not draw grid out of bounds
+	gridStart.x = math.max(gridStart.x, 0)
+	gridStart.y = math.max(gridStart.y, -LEVEL_HEIGHT)
 
 	-- choose which sprite to use
 	if (gridMode == 32) then
@@ -114,7 +120,14 @@ function drawGrid()
 		error('invalid gridMode')
 	end
 	for i=0, xTileNum do
+		local x = gridStart.x+gridMode*i
+		local y
+		-- only tile within map bounds
+		if (x >= LEVEL_WIDTH) then break end
 		for j=0, yTileNum do
+			y = gridStart.y+gridMode*j
+			-- only tile within map bounds
+			if (y>=0) then break end
 			love.graphics.draw(sprite, gridStart.x + gridMode*i, gridStart.y + gridMode*j)
 		end
 	end
@@ -147,4 +160,9 @@ end
 function setMousePosition()
 	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
 	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
+end
+
+function updateUI()
+	cameraFieldx:SetText(tostring(cameraPosition.x))
+	cameraFieldy:SetText(tostring(cameraPosition.y))
 end
