@@ -22,6 +22,7 @@ mousePosition = Vector(0,0)			-- the position of the mouse (global coords)
 mousePositionSnap = Vector(0,0)		-- the position that snap to grid will snap to if the mouse is clicked (global coords)
 snapMode = 32						-- what multiples the mouse will snap to
 gridMode = 64						-- the size of the grid squares
+ui = {}
 
 function love.load()
 	setupUI()
@@ -67,49 +68,10 @@ function love.textinput(text)
 	loveframes.textinput(text)
 end
 
-function setupUI()
-	-- toolpane
-	toolpane = loveframes.Create("panel")
-	toolpane.update = function(object, dt)
-		toolpane:SetSize(TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT - 1)
-		toolpane:SetPos(love.window.getWidth() - TOOLPANE_WIDTH, TOOLBAR_HEIGHT + 1)
-	end
-	toolpane:update(0)
-
-	-- toolbar
-	toolbar = loveframes.Create("panel")
-	toolbar.update = function(object, dt)
-		toolbar:SetSize(love.window.getWidth(), TOOLBAR_HEIGHT)
-	end
-	toolbar:update(0)
-
-	-- cameraField
-	local function onFocus(object)
-		object:SetText("")
-	end
-	-- x field
-	cameraFieldx = loveframes.Create("textinput")
-	cameraFieldx:SetWidth(50)
-	cameraFieldx:CenterWithinArea(46, 0, 96, TOOLBAR_HEIGHT)
-	cameraFieldx:SetFont(love.graphics.newFont(12))
-	cameraFieldx:SetEditable(true)
-	cameraFieldx:SetText(tostring(cameraPosition.x))
-	cameraFieldx.OnFocusGained = onFocus
-	cameraFieldx.OnEnter = function(object)
-		cameraPosition.x = tonumber(object:GetText())
-	end
-	-- y field
-	cameraFieldy = loveframes.Create("textinput")
-	cameraFieldy:SetWidth(50)
-	cameraFieldy:CenterWithinArea(142, 0, 192, TOOLBAR_HEIGHT)
-	cameraFieldy:SetFont(love.graphics.newFont(12))
-	cameraFieldy:SetEditable(true)
-	cameraFieldy:SetText(tostring(cameraPosition.y))
-	cameraFieldy.OnFocusGained = onFocus
-	cameraFieldy.OnEnter = function(object)
-		cameraPosition.y = tonumber(object:GetText())
-	end
+function love.resize(w, h)
+	loveframes.resize(w, h)
 end
+
 
 function drawGrid()
 	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
@@ -146,14 +108,6 @@ function drawGrid()
 	love.graphics.translate(cameraPosition.x, cameraPosition.y)
 end
 
-function drawUI()
-	loveframes.draw()
-	love.graphics.setColor(0,0,0)
-	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.setColor(255,255,255)
-end
-
 function cameraMovement(dt)
 	local dCamPos = Vector(0,0)		-- the position delta
 
@@ -180,4 +134,65 @@ function updateUI()
 	if (not cameraFieldy:GetFocus()) then
 		cameraFieldy:SetText(tostring(cameraPosition.y))
 	end
+end
+
+function setupUI()
+	-- toolpane
+	toolpane = loveframes.Create("panel")
+	toolpane.resize = function(object)
+		object:SetSize(TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT - 1)
+		object:SetPos(love.window.getWidth() - TOOLPANE_WIDTH, TOOLBAR_HEIGHT + 1)
+	end
+	toolpane:resize(0)
+
+	local button = loveframes.Create("button")
+	button:Center()
+
+	enemyCategory = loveframes.Create("collapsiblecategory", toolpane)
+	enemyCategory:SetText("Enemies")
+	enemyCategory:Center()
+	enemyCategory:SetObject(button)
+
+
+	-- toolbar
+	toolbar = loveframes.Create("panel")
+	toolbar.resize = function(object)
+		toolbar:SetSize(love.window.getWidth(), TOOLBAR_HEIGHT)
+	end
+	toolbar:resize(0)
+
+	-- cameraField
+	local function onFocus(object)
+		object:SetText("")
+	end
+	-- x field
+	cameraFieldx = loveframes.Create("textinput")
+	cameraFieldx:SetWidth(50)
+	cameraFieldx:CenterWithinArea(46, 0, 96, TOOLBAR_HEIGHT)
+	cameraFieldx:SetFont(love.graphics.newFont(12))
+	cameraFieldx:SetEditable(true)
+	cameraFieldx:SetText(tostring(cameraPosition.x))
+	cameraFieldx.OnFocusGained = onFocus
+	cameraFieldx.OnEnter = function(object)
+		cameraPosition.x = tonumber(object:GetText())
+	end
+	-- y field
+	cameraFieldy = loveframes.Create("textinput")
+	cameraFieldy:SetWidth(50)
+	cameraFieldy:CenterWithinArea(142, 0, 192, TOOLBAR_HEIGHT)
+	cameraFieldy:SetFont(love.graphics.newFont(12))
+	cameraFieldy:SetEditable(true)
+	cameraFieldy:SetText(tostring(cameraPosition.y))
+	cameraFieldy.OnFocusGained = onFocus
+	cameraFieldy.OnEnter = function(object)
+		cameraPosition.y = tonumber(object:GetText())
+	end
+end
+
+function drawUI()
+	loveframes.draw()
+	love.graphics.setColor(0,0,0)
+	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.setColor(255,255,255)
 end

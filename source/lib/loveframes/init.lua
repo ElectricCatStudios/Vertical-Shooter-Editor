@@ -272,6 +272,17 @@ function loveframes.textinput(text)
 	
 end
 
+--[[--------------------------------------------------------
+	- func: resize(w, h)
+	- desc: called when the player resizes the window
+--]]--------------------------------------------------------
+function loveframes.resize(w, h)
+
+	local base = loveframes.base
+	base:resize(w, h)
+
+end
+
 --[[---------------------------------------------------------
 	- func: Create(type, parent)
 	- desc: creates a new object or multiple new objects
