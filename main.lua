@@ -3,24 +3,68 @@ require "./source/lib/class"					-- class
 require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
+
 -- sprites
 spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
 spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
 -- constants
-CAMERA_SPEED = 250
-PROGRESSION_SPEED = 10
-TOOLPANE_WIDTH = 250
-TOOLBAR_HEIGHT = 32
+CAMERA_SPEED = 250			-- how fast the camera scrolls when user uses arrow keys
+PROGRESSION_SPEED = 10 		-- how fast the level will move forwards
+TOOLPANE_WIDTH = 250 		-- how wide the main tool pane is
+TOOLBAR_HEIGHT = 32			-- how tall the main toolbare is
 
 -- globals
-cameraPosition = Vector(0,0)
-mousePosition = Vector(0,0)
-mousePositionSnap = Vector(0,0)
-snapMode = 32
-gridMode = 64
+cameraPosition = Vector(0,0)		-- the position of the top left corner of the screen (global coords)
+mousePosition = Vector(0,0)			-- the position of the mouse (global coords)
+mousePositionSnap = Vector(0,0)		-- the position that snap to grid will snap to if the mouse is clicked (global coords)
+snapMode = 32						-- what multiples the mouse will snap to
+gridMode = 64						-- the size of the grid squares
 
 function love.load()
+	setupUI()
+	love.graphics.setBackgroundColor(180,180,180)
+end
+
+function love.update(dt)
+	loveframes.update(dt)
+	setMousePosition()
+	cameraMovement(dt)
+end
+
+function love.draw()
+	drawGrid()
+	drawUI()
+end
+
+function love.keypressed(key, unicode)
+	if (key == 'g') then
+		if (gridMode == 32) then
+			gridMode = 64
+		else
+			gridMode = 32
+		end
+	end
+	loveframes.keypressed(key, unicode)
+end
+
+function love.keyreleased(key, unicode)
+	loveframes.keyreleased(key)
+end
+
+function love.mousepressed(x, y, button)
+	loveframes.mousepressed(x, y, button)
+end
+
+function love.mousereleased(x, y, button)
+	loveframes.mousereleased(x, y, button)
+end
+
+function love.textinput(text)
+	loveframes.textinput(text)
+end
+
+function setupUI()
 	-- toolpane
 	toolpane = loveframes.Create("panel")
 	toolpane.update = function(object, dt)
@@ -51,37 +95,17 @@ function love.load()
 	cameraFieldy:SetFont(love.graphics.newFont(12))
 	cameraFieldy:SetEditable(true)
 	cameraFieldy:SetText(tostring(cameraPosition.y))
-
-	love.graphics.setBackgroundColor(180,180,180)
 end
 
-function love.update(dt)
-	-- camera movement
-	local dCamPos = Vector(0,0)
-	if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
-	if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
-	if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
-	if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
-	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
-	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
-	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+function drawGrid()
+	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
+	local xTileNum = love.window.getWidth()/gridMode + 1 			-- the number of columns
+	local yTileNum = love.window.getHeight()/gridMode + 1 			-- the number of rows
+	local sprite 		-- the sprite to be tiled											
 
-	-- mouse position
-	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
-	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
-
-	loveframes.update(dt)
-end
-
-function love.draw()
-	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)
-
-	-- non ui drawing
-	-- draw grid
 	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
-	local xTileNum = love.window.getWidth()/gridMode + 1
-	local yTileNum = love.window.getHeight()/gridMode + 1
-	local sprite
+
+	-- choose which sprite to use
 	if (gridMode == 32) then
 		sprite = spr_grid32
 	elseif (gridMode == 64) then
@@ -95,8 +119,10 @@ function love.draw()
 		end
 	end
 
-	-- ui drawing
 	love.graphics.translate(cameraPosition.x, cameraPosition.y)
+end
+
+function drawUI()
 	loveframes.draw()
 	love.graphics.setColor(0,0,0)
 	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
@@ -104,29 +130,21 @@ function love.draw()
 	love.graphics.setColor(255,255,255)
 end
 
-function love.keypressed(key, unicode)
-	if (key == 'g') then
-		if (gridMode == 32) then
-			gridMode = 64
-		else
-			gridMode = 32
-		end
-	end
-	loveframes.keypressed(key, unicode)
+function cameraMovement(dt)
+	local dCamPos = Vector(0,0)		-- the position delta
+
+	if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
+	if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
+	if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
+	if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
+
+	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
+	--round values to nearest integer so there isn't any nasty aliasing of the grid
+	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
+	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
 end
 
-function love.keyreleased(key, unicode)
-	loveframes.keyreleased(key)
-end
-
-function love.mousepressed(x, y, button)
-	loveframes.mousepressed(x, y, button)
-end
-
-function love.mousereleased(x, y, button)
-	loveframes.mousereleased(x, y, button)
-end
-
-function love.textinput(text)
-	loveframes.textinput(text)
+function setMousePosition()
+	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
+	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
 end
