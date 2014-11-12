@@ -1,7 +1,9 @@
 -- dependencies
-require "./source/lib/class"				-- class
-require './source/lib/util'				-- util functions
-Vector = require "./source/lib/vector"		-- vector
+require "./source/lib/class"					-- class
+require './source/lib/util'						-- util functions
+loveframes = require("source.lib.loveframes")	-- loveframes
+Vector = require "./source/lib/vector"			-- vector
+
 
 -- classes
 require "./source/classes/StateManager"		-- StateManager
@@ -25,12 +27,31 @@ end
 
 function love.update(dt)
 	state:update(dt)
+	loveframes.update(dt)
 end
 
 function love.draw()
 	state:draw()
+	loveframes.draw()
 end
 
-function love.keypressed(key,isrepeat)
+function love.keypressed(key, unicode)
 	state:keypressed(key)
+	loveframes.keypressed(key, unicode)
+end
+
+function love.keyreleased(key, unicode)
+	loveframes.keyreleased(key)
+end
+
+function love.mousepressed(x, y, button)
+	loveframes.mousepressed(x, y, button)
+end
+
+function love.mousereleased(x, y, button)
+	loveframes.mousereleased(x, y, button)
+end
+
+function love.textinput(text)
+	loveframes.textinput(text)
 end
