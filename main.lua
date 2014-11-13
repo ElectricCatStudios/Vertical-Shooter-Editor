@@ -33,7 +33,6 @@ function love.update(dt)
 	loveframes.update(dt)
 	setMousePosition()
 	cameraMovement(dt)
-	updateUI()
 end
 
 function love.draw()
@@ -127,39 +126,36 @@ function setMousePosition()
 	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
 end
 
-function updateUI()
-	if (not cameraFieldx:GetFocus()) then
-		cameraFieldx:SetText(tostring(cameraPosition.x))
-	end
-	if (not cameraFieldy:GetFocus()) then
-		cameraFieldy:SetText(tostring(cameraPosition.y))
-	end
-end
-
 function setupUI()
 	-- toolpane
-	toolpane = loveframes.Create("panel")
+	local toolpane 						-- the main pane on the right. A list of all ui elements
+	local enemyCategory					-- the expandable categary that holds the enemy grid
+	local enemyGrid						-- the grid of all the enemy buttons
+	-- toolbar
+	local toolbar 						-- the main toolbar at the top
+	local cameraFieldx, cameraFieldy 	-- the fields for the cameras position
+
+	--toolpane
+	toolpane = loveframes.Create("list")
 	toolpane.resize = function(object)
 		object:SetSize(TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT - 1)
 		object:SetPos(love.window.getWidth() - TOOLPANE_WIDTH, TOOLBAR_HEIGHT + 1)
 	end
-	toolpane:resize(0)
+	toolpane:resize()
+	toolpane:SetPadding(5)
+	toolpane:SetSpacing(5)
 
-	local button = loveframes.Create("button")
-	button:Center()
 
+	-- enemy Category
 	enemyCategory = loveframes.Create("collapsiblecategory", toolpane)
 	enemyCategory:SetText("Enemies")
-	enemyCategory:Center()
-	enemyCategory:SetObject(button)
-
 
 	-- toolbar
 	toolbar = loveframes.Create("panel")
 	toolbar.resize = function(object)
 		toolbar:SetSize(love.window.getWidth(), TOOLBAR_HEIGHT)
 	end
-	toolbar:resize(0)
+	toolbar:resize()
 
 	-- cameraField
 	local function onFocus(object)
@@ -176,6 +172,11 @@ function setupUI()
 	cameraFieldx.OnEnter = function(object)
 		cameraPosition.x = tonumber(object:GetText())
 	end
+	cameraFieldx.Update = function(object, dt)
+		if (not object:GetFocus()) then
+			object:SetText(tostring(cameraPosition.x))
+		end
+	end
 	-- y field
 	cameraFieldy = loveframes.Create("textinput")
 	cameraFieldy:SetWidth(50)
@@ -186,6 +187,11 @@ function setupUI()
 	cameraFieldy.OnFocusGained = onFocus
 	cameraFieldy.OnEnter = function(object)
 		cameraPosition.y = tonumber(object:GetText())
+	end
+	cameraFieldy.Update = function(object, dt)
+		if (not object:GetFocus()) then
+			object:SetText(tostring(cameraPosition.y))
+		end
 	end
 end
 
