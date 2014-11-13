@@ -129,7 +129,8 @@ end
 function setupUI()
 	-- toolpane
 	local toolpane 						-- the main pane on the right. A list of all ui elements
-	local enemyCategory					-- the expandable categary that holds the enemy grid
+	local enemyCategory					-- the expandable categary that holds the enemy ui
+	local pathCategory					-- the expandable category that holds path ui
 	local enemyGrid						-- the grid of all the enemy buttons
 	-- toolbar
 	local toolbar 						-- the main toolbar at the top
@@ -146,9 +147,36 @@ function setupUI()
 	toolpane:SetSpacing(5)
 
 
+
 	-- enemy Category
 	enemyCategory = loveframes.Create("collapsiblecategory", toolpane)
 	enemyCategory:SetText("Enemies")
+
+	-- enemy grid
+	enemyGrid = loveframes.Create("grid")
+	enemyGrid:SetRows(20)
+	enemyGrid:SetColumns(5)
+	enemyGrid:SetCellWidth(38)
+	enemyGrid:SetCellHeight(38)
+	enemyGrid:SetCellPadding(2)
+	enemyGrid:SetItemAutoSize(true)
+	enemyGrid:SetSize(enemyCategory:GetWidth()-4, 100)
+	local id = 1
+	for i=1, 20 do
+	    for n=1, 5 do
+	        local button = loveframes.Create("button")
+	        button:SetSize(15, 15)
+	        button:SetText(id)
+	        enemyGrid:AddItem(button, i, n)
+	        id = id + 1
+	    end
+	end
+	enemyCategory:SetObject(enemyGrid)
+	print(enemyGrid:GetHeight())
+
+	-- path category
+	pathCategory = loveframes.Create("collapsiblecategory", toolpane)
+	pathCategory:SetText("Path Tools")
 
 	-- toolbar
 	toolbar = loveframes.Create("panel")
