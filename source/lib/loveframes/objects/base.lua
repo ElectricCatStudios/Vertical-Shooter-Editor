@@ -80,7 +80,7 @@ function newobject:draw()
 	
 	local children = self.children
 	local internals = self.internals
-	
+
 	-- set the object's draw order
 	self:SetDrawOrder()
 	
@@ -264,6 +264,29 @@ function newobject:textinput(text)
 	if internals then
 		for k, v in ipairs(internals) do
 			v:textinput(text)
+		end
+	end
+
+end
+
+--[[--------------------------------------------------------
+	- func: resize(w, h)
+	- desc: called when the player resizes the window
+--]]--------------------------------------------------------
+function newobject:resize(w, h)
+
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
+	local children = self.children
+
+	if (children) then
+		for k, v in ipairs(children) do
+			v:resize(w, h)
 		end
 	end
 
