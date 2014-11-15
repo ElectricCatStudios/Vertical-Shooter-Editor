@@ -151,6 +151,14 @@ function setupUI()
 	-- enemy Category
 	enemyCategory = loveframes.Create("collapsiblecategory", toolpane)
 	enemyCategory:SetText("Enemies")
+	enemyCategory.OnOpenedClosed  = function(object)
+		child = object:GetObject()
+		child:SetX((enemyCategory:GetWidth() - child:GetWidth())/2)
+	end
+	enemyCategory.Update = function(object, dt)
+		child = object:GetObject()
+		child:SetX((enemyCategory:GetWidth() - child:GetWidth())/2)
+	end
 
 	-- enemy grid
 	enemyGrid = loveframes.Create("grid")
