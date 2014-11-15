@@ -15,6 +15,12 @@ TOOLPANE_WIDTH = 250 		-- how wide the main tool pane is
 TOOLBAR_HEIGHT = 32			-- how tall the main toolbare is
 LEVEL_WIDTH = 64*10			-- the width of the level
 LEVEL_HEIGHT = 64*10		-- how for forwards the level goes
+CROSSHAIR_SIZE = 32 		-- how big the center crosshair is
+-- cardinal direction constants
+Vector.UP = Vector(0,-1)
+Vector.DOWN = Vector(0,1)
+Vector.LEFT = Vector(-1,0)
+Vector.RIGHT = Vector(1,0)
 
 -- globals
 cameraPosition = Vector(0,0)		-- the position of the top left corner of the screen (global coords)
@@ -22,11 +28,13 @@ mousePosition = Vector(0,0)			-- the position of the mouse (global coords)
 mousePositionSnap = Vector(0,0)		-- the position that snap to grid will snap to if the mouse is clicked (global coords)
 snapMode = 32						-- what multiples the mouse will snap to
 gridMode = 64						-- the size of the grid squares
-ui = {}
+mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
+centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
 
 function love.load()
 	setupUI()
 	love.graphics.setBackgroundColor(180,180,180)
+	setCamCenterPos()
 end
 
 function love.update(dt)
@@ -68,7 +76,13 @@ function love.textinput(text)
 end
 
 function love.resize(w, h)
+	mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
+	centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
 	loveframes.resize(w, h)
+	setCamCenterPos()
+	-- round to nearest one for clean non aliased graphics
+	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
+	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
 end
 
 
@@ -119,6 +133,7 @@ function cameraMovement(dt)
 	--round values to nearest integer so there isn't any nasty aliasing of the grid
 	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
 	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+	setCamCenterPos()
 end
 
 function setMousePosition()
@@ -126,15 +141,12 @@ function setMousePosition()
 	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
 end
 
-function setupUI()
-	-- toolpane
+
+function setupToolPane()
 	local toolpane 						-- the main pane on the right. A list of all ui elements
 	local enemyCategory					-- the expandable categary that holds the enemy ui
 	local pathCategory					-- the expandable category that holds path ui
 	local enemyGrid						-- the grid of all the enemy buttons
-	-- toolbar
-	local toolbar 						-- the main toolbar at the top
-	local cameraFieldx, cameraFieldy 	-- the fields for the cameras position
 
 	--toolpane
 	toolpane = loveframes.Create("list")
@@ -151,10 +163,6 @@ function setupUI()
 	-- enemy Category
 	enemyCategory = loveframes.Create("collapsiblecategory", toolpane)
 	enemyCategory:SetText("Enemies")
-	enemyCategory.OnOpenedClosed  = function(object)
-		child = object:GetObject()
-		child:SetX((enemyCategory:GetWidth() - child:GetWidth())/2)
-	end
 	enemyCategory.Update = function(object, dt)
 		child = object:GetObject()
 		child:SetX((enemyCategory:GetWidth() - child:GetWidth())/2)
@@ -180,7 +188,7 @@ function setupUI()
 	    end
 	end
 	enemyCategory:SetObject(enemyGrid)
-	print(enemyGrid:GetHeight())
+
 
 	-- path category
 	pathCategory = loveframes.Create("collapsiblecategory", toolpane)
@@ -192,6 +200,11 @@ function setupUI()
 		toolbar:SetSize(love.window.getWidth(), TOOLBAR_HEIGHT)
 	end
 	toolbar:resize()
+end
+
+function setupToolbar()
+	local toolbar 						-- the main toolbar at the top
+	local cameraFieldx, cameraFieldy 	-- the fields for the cameras position
 
 	-- cameraField
 	local function onFocus(object)
@@ -206,11 +219,11 @@ function setupUI()
 	cameraFieldx:SetText(tostring(cameraPosition.x))
 	cameraFieldx.OnFocusGained = onFocus
 	cameraFieldx.OnEnter = function(object)
-		cameraPosition.x = tonumber(object:GetText())
+		cameraPosition.x = tonumber(object:GetText()) - centerOffset.x
 	end
 	cameraFieldx.Update = function(object, dt)
 		if (not object:GetFocus()) then
-			object:SetText(tostring(cameraPosition.x))
+			object:SetText(tostring(cameraCenterPos.x))
 		end
 	end
 	-- y field
@@ -222,13 +235,18 @@ function setupUI()
 	cameraFieldy:SetText(tostring(cameraPosition.y))
 	cameraFieldy.OnFocusGained = onFocus
 	cameraFieldy.OnEnter = function(object)
-		cameraPosition.y = tonumber(object:GetText())
+		cameraPosition.y = tonumber(object:GetText()) - centerOffset.y
 	end
 	cameraFieldy.Update = function(object, dt)
 		if (not object:GetFocus()) then
-			object:SetText(tostring(cameraPosition.y))
+			object:SetText(tostring(cameraCenterPos.y))
 		end
 	end
+end
+
+function setupUI()
+	setupToolPane()
+	setupToolbar()
 end
 
 function drawUI()
@@ -237,4 +255,15 @@ function drawUI()
 	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.setColor(255,255,255)
+
+	local top, bottom, left, right = 
+		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
+	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
+	love.graphics.line(left.x, left.y, right.x, right.y)
+end
+
+function setCamCenterPos()
+	cameraCenterPos = cameraPosition + centerOffset
+	cameraCenterPos.x = roundTo(cameraCenterPos.x, 1, 'nearest')
+	cameraCenterPos.y = roundTo(cameraCenterPos.y, 1, 'nearest')
 end
