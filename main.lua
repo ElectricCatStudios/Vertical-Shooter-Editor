@@ -30,6 +30,7 @@ snapMode = 32						-- what multiples the mouse will snap to
 gridMode = 64						-- the size of the grid squares
 mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
 centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
+cameraFieldx, cameraFieldy = nil, nil
 
 function love.load()
 	setupUI()
@@ -124,10 +125,12 @@ end
 function cameraMovement(dt)
 	local dCamPos = Vector(0,0)		-- the position delta
 
-	if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
-	if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
-	if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
-	if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
+	if (not (cameraFieldx:GetFocus() or cameraFieldy:GetFocus())) then
+		if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
+		if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
+		if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
+		if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
+	end
 
 	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
 	--round values to nearest integer so there isn't any nasty aliasing of the grid
@@ -204,7 +207,6 @@ end
 
 function setupToolbar()
 	local toolbar 						-- the main toolbar at the top
-	local cameraFieldx, cameraFieldy 	-- the fields for the cameras position
 
 	-- cameraField
 	local function onFocus(object)
