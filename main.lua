@@ -237,11 +237,11 @@ function setupToolbar()
 	cameraFieldy:SetText(tostring(cameraPosition.y))
 	cameraFieldy.OnFocusGained = onFocus
 	cameraFieldy.OnEnter = function(object)
-		cameraPosition.y = tonumber(object:GetText()) - centerOffset.y
+		cameraPosition.y = -tonumber(object:GetText()) - centerOffset.y
 	end
 	cameraFieldy.Update = function(object, dt)
 		if (not object:GetFocus()) then
-			object:SetText(tostring(cameraCenterPos.y))
+			object:SetText(tostring(-cameraCenterPos.y))
 		end
 	end
 end
