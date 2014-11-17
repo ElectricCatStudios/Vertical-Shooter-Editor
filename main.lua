@@ -36,6 +36,7 @@ function love.load()
 	setupUI()
 	love.graphics.setBackgroundColor(180,180,180)
 	setCamCenterPos()
+	cameraPosition = -centerOffset
 end
 
 function love.update(dt)
