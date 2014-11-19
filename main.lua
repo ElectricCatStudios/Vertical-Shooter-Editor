@@ -32,7 +32,7 @@ gridMode = 64						-- the size of the grid squares
 mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)		-- the size of the window area excluding the toolbar and toolpane
 centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT						-- the offset from the top right of the screen to the cerner of the main area (main area defined above)
 cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the cameras position
-mode = "default"								-- the current mode the ui intergface is in
+mode = "default"								-- the current mode the ui interface is in
 enemyIndex = nil								-- the current enemy type that is marked to be placed
 cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
 enemyList = {}									-- a list of all the enemies that have been placed on the level
@@ -54,60 +54,16 @@ function love.update(dt)
 	end
 end
 
+
+------------------------------------------
+-- DRAWING
+------------------------------------------
 function love.draw()
-	drawGrid()
+	drawTranslated()
 	drawUI()
 end
 
-function love.keypressed(key, unicode)
-	if (key == 'g') then
-		if (gridMode == 32) then
-			gridMode = 64
-		else
-			gridMode = 32
-		end
-	end
-	loveframes.keypressed(key, unicode)
-end
-
-function love.keyreleased(key, unicode)
-	loveframes.keyreleased(key)
-end
-
-function love.mousepressed(x, y, button)
-	if (button == 'l') then
-		if ((mode == "place enemy") and (x < mainAreaSize.x) and (y > TOOLBAR_HEIGHT)) then
-			enemyPlaced()
-			if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
-				mode = 'default'
-			end
-		end
-	elseif (button == 'r') then
-		mode = 'default'
-	end
-	loveframes.mousepressed(x, y, button)
-end
-
-function love.mousereleased(x, y, button)
-	loveframes.mousereleased(x, y, button)
-end
-
-function love.textinput(text)
-	loveframes.textinput(text)
-end
-
-function love.resize(w, h)
-	mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
-	centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
-	loveframes.resize(w, h)
-	setCamCenterPos()
-	-- round to nearest one for clean non aliased graphics
-	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
-	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
-end
-
-
-function drawGrid()
+function drawTranslated()
 	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
 	local xTileNum = love.window.getWidth()/gridMode + 1 			-- the number of columns
 	local yTileNum = love.window.getHeight()/gridMode + 1 			-- the number of rows
@@ -139,32 +95,82 @@ function drawGrid()
 		end
 	end
 
+	-- enemy placement
+	if (mode == 'place enemy') then
+		love.graphics.draw(spritesArray[enemyIndex], mousePositionSnap.x, mousePositionSnap.y, 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
+	end
+
 	love.graphics.translate(cameraPosition.x, cameraPosition.y)
 end
 
-function cameraMovement(dt)
-	local dCamPos = Vector(0,0)		-- the position delta
+function drawUI()
+	-- toolbar
+	loveframes.draw()
+	love.graphics.setColor(0,0,0)
+	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('     Snap:', 4 + 2*(46 + 100),  TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 
-	if (not (cameraFieldx:GetFocus() or cameraFieldy:GetFocus())) then
-		if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
-		if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
-		if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
-		if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
+	local snapPos = mousePositionSnap
+	snapPos.y = -snapPos.y
+	local mouseString = tostring(mousePositionSnap)
+	local _, _, p1, p2, p3 = mouseString:find('(%(%-?%d+)%.%d*(%,%-?%d+)%.%d*(%))')
+	mouseString = p1 .. p2 .. p3
+	love.graphics.print('Mouse: ' .. mouseString, love.window.getWidth() - 140, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.setColor(255,255,255)
+
+	-- croshair
+	local top, bottom, left, right = 
+		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
+	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
+	love.graphics.line(left.x, left.y, right.x, right.y)
+end
+
+
+-------------------------------------------
+-- INPUT
+-------------------------------------------
+function love.keypressed(key, unicode)
+	if (key == 'g') then
+		if (gridMode == 32) then
+			gridMode = 64
+		else
+			gridMode = 32
+		end
 	end
-
-	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
-	--round values to nearest integer so there isn't any nasty aliasing of the grid
-	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
-	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
-	setCamCenterPos()
+	loveframes.keypressed(key, unicode)
 end
 
-function setMousePosition()
-	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
-	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
+function love.keyreleased(key, unicode)
+	loveframes.keyreleased(key)
+end
+
+function love.mousepressed(x, y, button)
+	if (button == 'l') then
+		if ((mode == "place enemy") and (x < mainAreaSize.x) and (y > TOOLBAR_HEIGHT)) then
+			enemyPlaced(mousePositionSnap)
+			if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
+				mode = 'default'
+			end
+		end
+	elseif (button == 'r') then
+		mode = 'default'
+	end
+	loveframes.mousepressed(x, y, button)
+end
+
+function love.mousereleased(x, y, button)
+	loveframes.mousereleased(x, y, button)
+end
+
+function love.textinput(text)
+	loveframes.textinput(text)
 end
 
 
+------------------------------------------
+-- UI
+------------------------------------------
 function setupToolPane()
 	local toolpane 						-- the main pane on the right. A list of all ui elements
 	local enemyCategory					-- the expandable categary that holds the enemy ui
@@ -238,7 +244,7 @@ function setupToolPane()
 end
 
 function setupToolbar()
-	local toolbar 						-- the main toolbar at the top
+	local toolbar 			-- the main toolbar at the top
 
 	-- cameraField
 	local function onFocus(object)
@@ -276,6 +282,18 @@ function setupToolbar()
 			object:SetText(tostring(-cameraCenterPos.y))
 		end
 	end
+
+	-- snap field
+	local snapField = loveframes.Create("textinput")
+	snapField:SetWidth(50)
+	snapField:CenterWithinArea(142+96, 0, 192+96, TOOLBAR_HEIGHT)
+	snapField:SetFont(love.graphics.newFont(12))
+	snapField:SetEditable(true)
+	snapField:SetText(tostring(snapMode))
+	snapField.OnFocusGained = onFocus
+	snapField.OnEnter = function(object)
+		snapMode = tonumber(object:GetText())
+	end
 end
 
 function setupUI()
@@ -283,24 +301,40 @@ function setupUI()
 	setupToolbar()
 end
 
-function drawUI()
-	-- toolbar
-	loveframes.draw()
-	love.graphics.setColor(0,0,0)
-	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.setColor(255,255,255)
 
-	-- croshair
-	local top, bottom, left, right = 
-		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
-	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
-	love.graphics.line(left.x, left.y, right.x, right.y)
+------------------------------------------
+-- OTHER
+------------------------------------------
+function love.resize(w, h)
+	mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
+	centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
+	loveframes.resize(w, h)
+	setCamCenterPos()
+	-- round to nearest one for clean non aliased graphics
+	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
+	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+end
 
-	-- enemy placement
-	if (mode == 'place enemy') then
-		love.graphics.draw(spritesArray[enemyIndex], love.mouse.getX(), love.mouse.getY(), 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
+function cameraMovement(dt)
+	local dCamPos = Vector(0,0)		-- the position delta
+
+	if (not (cameraFieldx:GetFocus() or cameraFieldy:GetFocus())) then
+		if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector(0,-1) end
+		if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector(0,1) end
+		if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector(-1,0) end
+		if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
 	end
+
+	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
+	--round values to nearest integer so there isn't any nasty aliasing of the grid
+	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
+	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+	setCamCenterPos()
+end
+
+function setMousePosition()
+	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
+	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
 end
 
 function setCamCenterPos()
@@ -316,6 +350,6 @@ function enemyButtonPressed(self, mouseX, mouseY)
 	end
 end	
 
-function enemyPlaced()
-	print("placing enemy #" .. enemyIndex)
+function enemyPlaced(pos)
+	print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
 end
