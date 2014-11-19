@@ -3,6 +3,7 @@ require "./source/lib/class"					-- class
 require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
+require "./source/loadSprites"
 
 -- sprites
 spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
@@ -28,21 +29,29 @@ mousePosition = Vector(0,0)			-- the position of the mouse (global coords)
 mousePositionSnap = Vector(0,0)		-- the position that snap to grid will snap to if the mouse is clicked (global coords)
 snapMode = 32						-- what multiples the mouse will snap to
 gridMode = 64						-- the size of the grid squares
-mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
-centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
-cameraFieldx, cameraFieldy = nil, nil
+mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)		-- the size of the window area excluding the toolbar and toolpane
+centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT						-- the offset from the top right of the screen to the cerner of the main area (main area defined above)
+cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the cameras position
+mode = "default"								-- the current mode the ui intergface is in
+enemyIndex = nil								-- the current enemy type that is marked to be placed
+cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
+enemyList = {}									-- a list of all the enemies that have been placed on the level
 
 function love.load()
 	setupUI()
 	love.graphics.setBackgroundColor(180,180,180)
-	setCamCenterPos()
 	cameraPosition = -centerOffset
+	setCamCenterPos()
 end
 
 function love.update(dt)
 	loveframes.update(dt)
 	setMousePosition()
 	cameraMovement(dt)
+
+	if (mode == 'place enemy') then
+
+	end
 end
 
 function love.draw()
@@ -66,6 +75,16 @@ function love.keyreleased(key, unicode)
 end
 
 function love.mousepressed(x, y, button)
+	if (button == 'l') then
+		if ((mode == "place enemy") and (x < mainAreaSize.x) and (y > TOOLBAR_HEIGHT)) then
+			enemyPlaced()
+			if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
+				mode = 'default'
+			end
+		end
+	elseif (button == 'r') then
+		mode = 'default'
+	end
 	loveframes.mousepressed(x, y, button)
 end
 
@@ -173,22 +192,34 @@ function setupToolPane()
 	end
 
 	-- enemy grid
+	local gridColumns = 6
+	local gridRows = roundTo(#spritesArray/gridColumns, 1, 'up')
+	print(gridRows)
 	enemyGrid = loveframes.Create("grid")
-	enemyGrid:SetRows(20)
-	enemyGrid:SetColumns(5)
-	enemyGrid:SetCellWidth(38)
-	enemyGrid:SetCellHeight(38)
+	enemyGrid:SetRows(gridRows)
+	enemyGrid:SetColumns(gridColumns)
+	enemyGrid:SetCellWidth(32)
+	enemyGrid:SetCellHeight(32)
 	enemyGrid:SetCellPadding(2)
 	enemyGrid:SetItemAutoSize(true)
 	enemyGrid:SetSize(enemyCategory:GetWidth()-4, 100)
 	local id = 1
-	for i=1, 20 do
-	    for n=1, 5 do
-	        local button = loveframes.Create("button")
+	for i=1, gridRows do
+	    for n=1, gridColumns do
+	        local button = loveframes.Create("imagebutton")
+	        local tooltip = loveframes.Create("tooltip")
+	        tooltip:SetObject(button)
+	        tooltip:SetText(toolTipsArray[id])
+	        button:SetImage(spritesArray[id])
 	        button:SetSize(15, 15)
-	        button:SetText(id)
+	        button:SetText("")
 	        enemyGrid:AddItem(button, i, n)
+	        button.id = id
+	        button.OnClick = enemyButtonPressed
 	        id = id + 1
+	        if (id > #spritesArray) then
+	        	break
+	        end
 	    end
 	end
 	enemyCategory:SetObject(enemyGrid)
@@ -253,20 +284,38 @@ function setupUI()
 end
 
 function drawUI()
+	-- toolbar
 	loveframes.draw()
 	love.graphics.setColor(0,0,0)
 	love.graphics.print('Camera x:', 4, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.setColor(255,255,255)
 
+	-- croshair
 	local top, bottom, left, right = 
 		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
 	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
 	love.graphics.line(left.x, left.y, right.x, right.y)
+
+	-- enemy placement
+	if (mode == 'place enemy') then
+		love.graphics.draw(spritesArray[enemyIndex], love.mouse.getX(), love.mouse.getY(), 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
+	end
 end
 
 function setCamCenterPos()
 	cameraCenterPos = cameraPosition + centerOffset
 	cameraCenterPos.x = roundTo(cameraCenterPos.x, 1, 'nearest')
 	cameraCenterPos.y = roundTo(cameraCenterPos.y, 1, 'nearest')
+end
+
+function enemyButtonPressed(self, mouseX, mouseY)
+	if (mode == "default") then
+		mode = "place enemy"
+		enemyIndex = self.id
+	end
+end	
+
+function enemyPlaced()
+	print("placing enemy #" .. enemyIndex)
 end
