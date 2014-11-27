@@ -10,13 +10,14 @@ spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
 spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
 -- constants
-CAMERA_SPEED = 250			-- how fast the camera scrolls when user uses arrow keys
-PROGRESSION_SPEED = 10 		-- how fast the level will move forwards
-TOOLPANE_WIDTH = 250 		-- how wide the main tool pane is
-TOOLBAR_HEIGHT = 32			-- how tall the main toolbare is
-LEVEL_WIDTH = 64*10			-- the width of the level
-LEVEL_HEIGHT = 64*10		-- how for forwards the level goes
-CROSSHAIR_SIZE = 32 		-- how big the center crosshair is
+BACKGROUND = love.graphics.newImage("/resources/background.png")
+CAMERA_SPEED = 250							-- how fast the camera scrolls when user uses arrow keys
+PROGRESSION_SPEED = 10 						-- how fast the level will move forwards
+TOOLPANE_WIDTH = 250 						-- how wide the main tool pane is
+TOOLBAR_HEIGHT = 32							-- how tall the main toolbare is
+LEVEL_WIDTH = BACKGROUND:getWidth()			-- the width of the level
+LEVEL_HEIGHT = BACKGROUND:getHeight()		-- how for forwards the level goes
+CROSSHAIR_SIZE = 32 						-- how big the center crosshair is
 -- cardinal direction constants
 Vector.UP = Vector(0,-1)
 Vector.DOWN = Vector(0,1)
@@ -37,8 +38,13 @@ enemyIndex = nil								-- the current enemy type that is marked to be placed
 cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
 enemyList = {}									-- a list of all the enemies that have been placed on the level
 
-function love.load()
+-------------------------------------------
+-- INIT AND MAIN LOOP
+-------------------------------------------
+
+function love.load(arg)
 	setupUI()
+	loadBackground()
 	love.graphics.setBackgroundColor(180,180,180)
 	cameraPosition = -centerOffset
 	setCamCenterPos()
@@ -64,12 +70,15 @@ function love.draw()
 end
 
 function drawTranslated()
+	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
+
+	love.graphics.draw(BACKGROUND, 0, -LEVEL_HEIGHT)
+
 	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
 	local xTileNum = love.window.getWidth()/gridMode + 1 			-- the number of columns
 	local yTileNum = love.window.getHeight()/gridMode + 1 			-- the number of rows
 	local sprite 		-- the sprite to be tiled											
 
-	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
 	-- do not draw grid out of bounds
 	gridStart.x = math.max(gridStart.x, 0)
 	gridStart.y = math.max(gridStart.y, -LEVEL_HEIGHT)
@@ -200,7 +209,6 @@ function setupToolPane()
 	-- enemy grid
 	local gridColumns = 6
 	local gridRows = roundTo(#spritesArray/gridColumns, 1, 'up')
-	print(gridRows)
 	enemyGrid = loveframes.Create("grid")
 	enemyGrid:SetRows(gridRows)
 	enemyGrid:SetColumns(gridColumns)
@@ -352,4 +360,8 @@ end
 
 function enemyPlaced(pos)
 	print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
+end
+
+function loadBackground()
+
 end
