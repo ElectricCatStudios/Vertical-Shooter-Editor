@@ -1,5 +1,5 @@
 spritesArray = {}
-toolTipsArray = {}
+enemyTypeArray = {}
 
 local function aInsert(name)
 	-- spritesArray:insert(love.graphics.newImage(dir .. name .. '.png'))
@@ -10,6 +10,6 @@ aInsert('ship1')
 aInsert('ship2')
 aInsert('ship3')
 
-toolTipsArray[1] = 'Enemy 1'
-toolTipsArray[2] = 'Enemy 2'
-toolTipsArray[3] = 'Enemy 3'
+enemyTypeArray[1] = 'Enemy 1'
+enemyTypeArray[2] = 'Enemy 2'
+enemyTypeArray[3] = 'Enemy 3'

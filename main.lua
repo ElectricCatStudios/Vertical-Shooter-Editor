@@ -4,6 +4,7 @@ require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
 require "./source/loadSprites"
+require "/source/Enemy"
 
 -- sprites
 spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
@@ -72,6 +73,7 @@ end
 function drawTranslated()
 	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
 
+	-- draw background
 	love.graphics.draw(BACKGROUND, 0, -LEVEL_HEIGHT)
 
 	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
@@ -104,9 +106,13 @@ function drawTranslated()
 		end
 	end
 
+	for enemyIndex, enemy in pairs(enemyList) do
+		enemy:draw()
+	end
+
 	-- enemy placement
 	if (mode == 'place enemy') then
-		love.graphics.draw(spritesArray[enemyIndex], mousePositionSnap.x, mousePositionSnap.y, 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
+		love.graphics.draw(spritesArray[enemyIndex], mousePositionSnap.x, -mousePositionSnap.y, 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
 	end
 
 	love.graphics.translate(cameraPosition.x, cameraPosition.y)
@@ -223,7 +229,7 @@ function setupToolPane()
 	        local button = loveframes.Create("imagebutton")
 	        local tooltip = loveframes.Create("tooltip")
 	        tooltip:SetObject(button)
-	        tooltip:SetText(toolTipsArray[id])
+	        tooltip:SetText(enemyTypeArray[id])
 	        button:SetImage(spritesArray[id])
 	        button:SetSize(15, 15)
 	        button:SetText("")
@@ -342,6 +348,7 @@ end
 
 function setMousePosition()
 	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
+	mousePosition.y = -mousePosition.y
 	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
 end
 
@@ -360,6 +367,13 @@ end
 
 function enemyPlaced(pos)
 	print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
+	local enemy =  Enemy:new(enemyTypeArray[enemyIndex], pos, spritesArray[enemyIndex])
+	table.insert(enemyList,enemy)
+	enemy.path = "Fighter1, 5, 2\nstart, 1\n\t0, -100\nbezier2, 2, 2\n\t0,-420\n\t320,-420\nwait, 0, 3\nbezier3, 3, 4\n\t640, -420\n\t640,-100\n\t320,-100\nend, 0\n"
+	print(enemy.path)
+	for i, v in pairs(enemyList) do
+		print(i, v)
+	end
 end
 
 function loadBackground()
