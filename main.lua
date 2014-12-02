@@ -44,6 +44,7 @@ enemyList = {}									-- a list of all the enemies that have been placed on the
 -------------------------------------------
 
 function love.load(arg)
+	output = io.open("./levels/output.lvl", "w")
 	setupUI()
 	loadBackground()
 	love.graphics.setBackgroundColor(180,180,180)
@@ -368,12 +369,27 @@ end
 function enemyPlaced(pos)
 	print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
 	local enemy =  Enemy:new(enemyTypeArray[enemyIndex], pos, spritesArray[enemyIndex])
+
+	local coords = {}
+	coords[1] = tostring(pos.x) .. ", " .. tostring(pos.y)
+	coords[2] = tostring(pos.x) .. ", " .. tostring(pos.y + 300)
+
+	local lines = {}
+
+	lines[1] = "Fighter1, 3, 3\n"
+	lines[2] = "\tstart, 1\n"
+	lines[3] = "\t\t" .. coords[1] .. "\n"
+	lines[4] = "\tlinear, 1, 6\n"
+	lines[5] = "\t\t" .. coords[2] .. "\n"
+	lines[6] = "\tend, 0\n"
+ 
 	table.insert(enemyList,enemy)
-	enemy.path = "Fighter1, 5, 2\nstart, 1\n\t0, -100\nbezier2, 2, 2\n\t0,-420\n\t320,-420\nwait, 0, 3\nbezier3, 3, 4\n\t640, -420\n\t640,-100\n\t320,-100\nend, 0\n"
-	print(enemy.path)
-	for i, v in pairs(enemyList) do
-		print(i, v)
+	enemy.path = ""
+	for i, v in ipairs(lines) do
+		enemy.path = enemy.path .. v
 	end
+	print(enemy.path)
+	output:write(enemy.path)
 end
 
 function loadBackground()
