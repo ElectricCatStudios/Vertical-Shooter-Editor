@@ -1,144 +1,246 @@
 Fighter1, 3, 3
 	start, 1
-		32, -64
+		96, -512
 	linear, 1, 6
-		32, 236
+		96, 488
 	end, 0
 Fighter1, 3, 3
 	start, 1
-		192, -128
+		416, -512
 	linear, 1, 6
-		192, 172
+		416, 488
 	end, 0
 Fighter1, 3, 3
 	start, 1
-		256, -224
+		192, -736
 	linear, 1, 6
-		256, 76
+		192, 264
 	end, 0
 Fighter1, 3, 3
 	start, 1
-		352, -320
+		736, -768
 	linear, 1, 6
-		352, -20
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		448, -416
-	linear, 1, 6
-		448, -116
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		512, -448
-	linear, 1, 6
-		512, -148
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		672, -544
-	linear, 1, 6
-		672, -244
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		832, -544
-	linear, 1, 6
-		832, -244
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		960, -416
-	linear, 1, 6
-		960, -116
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		992, -256
-	linear, 1, 6
-		992, 44
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		960, -128
-	linear, 1, 6
-		960, 172
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		96, -544
-	linear, 1, 6
-		96, -244
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		256, -448
-	linear, 1, 6
-		256, -148
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		480, -320
-	linear, 1, 6
-		480, -20
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		576, -224
-	linear, 1, 6
-		576, 76
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		704, -160
-	linear, 1, 6
-		704, 140
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		896, -288
-	linear, 1, 6
-		896, 12
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		800, -448
-	linear, 1, 6
-		800, -148
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		544, -512
-	linear, 1, 6
-		544, -212
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		384, -576
-	linear, 1, 6
-		384, -276
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		192, -704
-	linear, 1, 6
-		192, -404
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		448, -672
-	linear, 1, 6
-		448, -372
-	end, 0
-Fighter1, 3, 3
-	start, 1
-		704, -640
-	linear, 1, 6
-		704, -340
+		736, 232
 	end, 0
 Fighter1, 3, 3
 	start, 1
 		928, -608
 	linear, 1, 6
-		928, -308
+		928, 392
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		448, -672
+	linear, 1, 6
+		448, 328
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		544, -928
+	linear, 1, 6
+		544, 72
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		160, -1024
+	linear, 1, 6
+		160, -24
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		96, -1184
+	linear, 1, 6
+		96, -184
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		288, -1376
+	linear, 1, 6
+		288, -376
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		512, -1408
+	linear, 1, 6
+		512, -408
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		384, -1120
+	linear, 1, 6
+		384, -120
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		800, -1088
+	linear, 1, 6
+		800, -88
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		992, -1504
+	linear, 1, 6
+		992, -504
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		768, -1536
+	linear, 1, 6
+		768, -536
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		224, -1728
+	linear, 1, 6
+		224, -728
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		32, -1568
+	linear, 1, 6
+		32, -568
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		736, -1792
+	linear, 1, 6
+		736, -792
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		320, -2144
+	linear, 1, 6
+		320, -1144
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		96, -2080
+	linear, 1, 6
+		96, -1080
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		704, -1920
+	linear, 1, 6
+		704, -920
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		864, -2208
+	linear, 1, 6
+		864, -1208
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		672, -2144
+	linear, 1, 6
+		672, -1144
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		64, -2368
+	linear, 1, 6
+		64, -1368
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		480, -2368
+	linear, 1, 6
+		480, -1368
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		192, -2624
+	linear, 1, 6
+		192, -1624
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		448, -2816
+	linear, 1, 6
+		448, -1816
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		672, -2528
+	linear, 1, 6
+		672, -1528
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		1024, -2464
+	linear, 1, 6
+		1024, -1464
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		832, -2816
+	linear, 1, 6
+		832, -1816
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		544, -2688
+	linear, 1, 6
+		544, -1688
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		128, -2944
+	linear, 1, 6
+		128, -1944
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		192, -3136
+	linear, 1, 6
+		192, -2136
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		608, -3008
+	linear, 1, 6
+		608, -2008
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		384, -3008
+	linear, 1, 6
+		384, -2008
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		864, -3104
+	linear, 1, 6
+		864, -2104
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		672, -3232
+	linear, 1, 6
+		672, -2232
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		512, -3360
+	linear, 1, 6
+		512, -2360
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		96, -3424
+	linear, 1, 6
+		96, -2424
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		416, -3552
+	linear, 1, 6
+		416, -2552
+	end, 0
+Fighter1, 3, 3
+	start, 1
+		896, -3520
+	linear, 1, 6
+		896, -2520
 	end, 0

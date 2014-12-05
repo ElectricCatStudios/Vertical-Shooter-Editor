@@ -372,7 +372,7 @@ function enemyPlaced(pos)
 
 	local coords = {}
 	coords[1] = tostring(pos.x) .. ", " .. tostring(pos.y)
-	coords[2] = tostring(pos.x) .. ", " .. tostring(pos.y + 300)
+	coords[2] = tostring(pos.x) .. ", " .. tostring(pos.y + 1000)
 
 	local lines = {}
 
