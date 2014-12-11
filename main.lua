@@ -1,8 +1,9 @@
 -- dependencies
-require "./source/lib/class"					-- class
+require "./source/lib/yaci"					-- class
 require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
+require './source/lib/PriorityQueue'
 require "./source/loadSprites"
 require "/source/Enemy"
 
@@ -37,7 +38,7 @@ cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the c
 mode = "default"								-- the current mode the ui interface is in
 enemyIndex = nil								-- the current enemy type that is marked to be placed
 cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
-enemyList = {}									-- a list of all the enemies that have been placed on the level
+enemyQueue = PriorityQueue:new()		-- A heap sorted by player position containing enemy position and path data
 
 -------------------------------------------
 -- INIT AND MAIN LOOP
@@ -56,10 +57,6 @@ function love.update(dt)
 	loveframes.update(dt)
 	setMousePosition()
 	cameraMovement(dt)
-
-	if (mode == 'place enemy') then
-
-	end
 end
 
 
@@ -77,10 +74,11 @@ function drawTranslated()
 	-- draw background
 	love.graphics.draw(BACKGROUND, 0, -LEVEL_HEIGHT)
 
-	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)	-- the top left corner of the grid
+	-- the top left corner of the grid
+	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)
 	local xTileNum = love.window.getWidth()/gridMode + 1 			-- the number of columns
 	local yTileNum = love.window.getHeight()/gridMode + 1 			-- the number of rows
-	local sprite 		-- the sprite to be tiled											
+	local sprite 		-- the sprite to be tiled
 
 	-- do not draw grid out of bounds
 	gridStart.x = math.max(gridStart.x, 0)
@@ -107,7 +105,7 @@ function drawTranslated()
 		end
 	end
 
-	for enemyIndex, enemy in pairs(enemyList) do
+	for enemy in enemyQueue:IterateData(enemyQueue) do
 		enemy:draw()
 	end
 
@@ -136,7 +134,7 @@ function drawUI()
 	love.graphics.setColor(255,255,255)
 
 	-- croshair
-	local top, bottom, left, right = 
+	local top, bottom, left, right =
 		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
 	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
 	love.graphics.line(left.x, left.y, right.x, right.y)
@@ -309,6 +307,25 @@ function setupToolbar()
 	snapField.OnEnter = function(object)
 		snapMode = tonumber(object:GetText())
 	end
+
+	-- export button
+	local exportButton = loveframes.Create('button', toolbar)
+	exportButton:SetWidth(80)
+	exportButton:SetText("Export Level")
+	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, TOOLBAR_HEIGHT)
+	exportButton.OnClick = function(object)
+		local queueCopy = enemyQueue:Clone()
+
+		local i = 1
+		local enemy = enemyQueue:Remove()
+		while(enemy) do
+			output:write(enemy.path)
+			enemy = enemyQueue:Remove()
+			i = i+1
+		end
+
+		enemyQueue = queueCopy
+	end
 end
 
 function setupUI()
@@ -364,10 +381,10 @@ function enemyButtonPressed(self, mouseX, mouseY)
 		mode = "place enemy"
 		enemyIndex = self.id
 	end
-end	
+end
 
 function enemyPlaced(pos)
-	print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
+	-- print("placing enemy #" .. enemyIndex .. ' at pos: ' .. tostring(pos))
 	local enemy =  Enemy:new(enemyTypeArray[enemyIndex], pos, spritesArray[enemyIndex])
 
 	local coords = {}
@@ -382,14 +399,12 @@ function enemyPlaced(pos)
 	lines[4] = "\tlinear, 1, 6\n"
 	lines[5] = "\t\t" .. coords[2] .. "\n"
 	lines[6] = "\tend, 0\n"
- 
-	table.insert(enemyList,enemy)
+
+	enemyQueue:Insert(enemy, pos.y)
 	enemy.path = ""
 	for i, v in ipairs(lines) do
 		enemy.path = enemy.path .. v
 	end
-	print(enemy.path)
-	output:write(enemy.path)
 end
 
 function loadBackground()

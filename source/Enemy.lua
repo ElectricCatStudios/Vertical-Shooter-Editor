@@ -1,4 +1,4 @@
-Enemy = class:new()
+Enemy = newclass("Enemy")
 
 function Enemy:init(type, position, sprite)
 	self.type = type
