@@ -1,5 +1,8 @@
+-- TODO: Handle file io more elegantly, the program currently keeps control over output file the whole time it
+-- is running
+
 -- dependencies
-require "./source/lib/yaci"					-- class
+require "./source/lib/yaci"						-- class
 require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
@@ -38,7 +41,7 @@ cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the c
 mode = "default"								-- the current mode the ui interface is in
 enemyIndex = nil								-- the current enemy type that is marked to be placed
 cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
-enemyQueue = PriorityQueue:new()		-- A heap sorted by player position containing enemy position and path data
+enemyList = {}		-- A heap sorted by player position containing enemy position and path data
 
 -------------------------------------------
 -- INIT AND MAIN LOOP
@@ -105,7 +108,7 @@ function drawTranslated()
 		end
 	end
 
-	for enemy in enemyQueue:IterateData(enemyQueue) do
+	for index, enemy in pairs(enemyList) do
 		enemy:draw()
 	end
 
@@ -314,17 +317,9 @@ function setupToolbar()
 	exportButton:SetText("Export Level")
 	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, TOOLBAR_HEIGHT)
 	exportButton.OnClick = function(object)
-		local queueCopy = enemyQueue:Clone()
-
-		local i = 1
-		local enemy = enemyQueue:Remove()
-		while(enemy) do
+		for index,enemy in pairs(enemyList) do
 			output:write(enemy.path)
-			enemy = enemyQueue:Remove()
-			i = i+1
 		end
-
-		enemyQueue = queueCopy
 	end
 end
 
@@ -400,9 +395,9 @@ function enemyPlaced(pos)
 	lines[5] = "\t\t" .. coords[2] .. "\n"
 	lines[6] = "\tend, 0\n"
 
-	enemyQueue:Insert(enemy, pos.y)
+	table.insert(enemyList, enemy)
 	enemy.path = ""
-	for i, v in ipairs(lines) do
+	for i, v in pairs(lines) do
 		enemy.path = enemy.path .. v
 	end
 end
