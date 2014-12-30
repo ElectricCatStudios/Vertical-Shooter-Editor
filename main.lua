@@ -3,45 +3,45 @@
 
 -- dependencies
 require "./source/lib/yaci"						-- class
-require './source/lib/util'						-- util functions
 loveframes = require("source.lib.loveframes")	-- loveframes
 Vector = require "./source/lib/vector"			-- vector
+require './source/lib/util'						-- util functions
 require './source/lib/PriorityQueue'
 require "./source/loadSprites"
 require "/source/Enemy"
+
+-- constants
+CAMERA_SPEED = 250							-- how fast the camera scrolls when user uses arrow keys
+PROGRESSION_SPEED = 10 						-- how fast the level will move forwards
+TOOLPANE_WIDTH = 250 						-- how wide the main tool pane is
+TOOLBAR_HEIGHT = 32							-- how tall the main toolbare is
+CROSSHAIR_SIZE = 32 						-- how big the center crosshair is
+
+window = {}
+window.mainAreaStart = Vector(0, TOOLBAR_HEIGHT)
+window.mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
+window.centerOffset = window.mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
+
+world = {}
+world.background = love.graphics.newImage("/resources/background.png")
+world.width = world.background:getWidth()
+world.height = world.background:getHeight()
+world.enemies = {}
+world.cameraPosition = -window.centerOffset
+
+interface = {}
+interface.snap = 32
 
 -- sprites
 spr_grid32 = love.graphics.newImage("/resources/grid32.png")		-- playerShip1
 spr_grid64 = love.graphics.newImage("/resources/grid64.png")		-- enemyShip1
 
--- constants
-BACKGROUND = love.graphics.newImage("/resources/background.png")
-CAMERA_SPEED = 250							-- how fast the camera scrolls when user uses arrow keys
-PROGRESSION_SPEED = 10 						-- how fast the level will move forwards
-TOOLPANE_WIDTH = 250 						-- how wide the main tool pane is
-TOOLBAR_HEIGHT = 32							-- how tall the main toolbare is
-LEVEL_WIDTH = BACKGROUND:getWidth()			-- the width of the level
-LEVEL_HEIGHT = BACKGROUND:getHeight()		-- how for forwards the level goes
-CROSSHAIR_SIZE = 32 						-- how big the center crosshair is
--- cardinal direction constants
-Vector.UP = Vector(0,-1)
-Vector.DOWN = Vector(0,1)
-Vector.LEFT = Vector(-1,0)
-Vector.RIGHT = Vector(1,0)
-
 -- globals
-cameraPosition = Vector(0,0)		-- the position of the top left corner of the screen (global coords)
-mousePosition = Vector(0,0)			-- the position of the mouse (global coords)
-mousePositionSnap = Vector(0,0)		-- the position that snap to grid will snap to if the mouse is clicked (global coords)
-snapMode = 32						-- what multiples the mouse will snap to
 gridMode = 64						-- the size of the grid squares
-mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)		-- the size of the window area excluding the toolbar and toolpane
-centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT						-- the offset from the top right of the screen to the cerner of the main area (main area defined above)
 cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the cameras position
 mode = "default"								-- the current mode the ui interface is in
 enemyIndex = nil								-- the current enemy type that is marked to be placed
 cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
-enemyList = {}		-- A heap sorted by player position containing enemy position and path data
 
 -------------------------------------------
 -- INIT AND MAIN LOOP
@@ -49,16 +49,13 @@ enemyList = {}		-- A heap sorted by player position containing enemy position an
 
 function love.load(arg)
 	output = io.open("./levels/output.lvl", "w")
-	setupUI()
-	loadBackground()
 	love.graphics.setBackgroundColor(180,180,180)
-	cameraPosition = -centerOffset
+	setupUI()
 	setCamCenterPos()
 end
 
 function love.update(dt)
 	loveframes.update(dt)
-	setMousePosition()
 	cameraMovement(dt)
 end
 
@@ -72,20 +69,20 @@ function love.draw()
 end
 
 function drawTranslated()
-	love.graphics.translate(-cameraPosition.x, -cameraPosition.y)
+	love.graphics.translate(-world.cameraPosition.x, -world.cameraPosition.y)
 
 	-- draw background
-	love.graphics.draw(BACKGROUND, 0, -LEVEL_HEIGHT)
+	love.graphics.draw(world.background, 0, -world.height)
 
 	-- the top left corner of the grid
-	local gridStart = cameraPosition - Vector(cameraPosition.x%gridMode,cameraPosition.y%gridMode)
+	local gridStart = world.cameraPosition - Vector(world.cameraPosition.x%gridMode,world.cameraPosition.y%gridMode)
 	local xTileNum = love.window.getWidth()/gridMode + 1 			-- the number of columns
 	local yTileNum = love.window.getHeight()/gridMode + 1 			-- the number of rows
 	local sprite 		-- the sprite to be tiled
 
 	-- do not draw grid out of bounds
 	gridStart.x = math.max(gridStart.x, 0)
-	gridStart.y = math.max(gridStart.y, -LEVEL_HEIGHT)
+	gridStart.y = math.max(gridStart.y, -world.height)
 
 	-- choose which sprite to use
 	if (gridMode == 32) then
@@ -99,7 +96,7 @@ function drawTranslated()
 		local x = gridStart.x+gridMode*i
 		local y
 		-- only tile within map bounds
-		if (x >= LEVEL_WIDTH) then break end
+		if (x >= world.width) then break end
 		for j=0, yTileNum do
 			y = gridStart.y+gridMode*j
 			-- only tile within map bounds
@@ -108,16 +105,16 @@ function drawTranslated()
 		end
 	end
 
-	for index, enemy in pairs(enemyList) do
+	for index, enemy in pairs(world.enemies) do
 		enemy:draw()
 	end
 
 	-- enemy placement
 	if (mode == 'place enemy') then
-		love.graphics.draw(spritesArray[enemyIndex], mousePositionSnap.x, -mousePositionSnap.y, 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
+		love.graphics.draw(spritesArray[enemyIndex], getMouseWorldPositionSnapped(interface.snap).x, -getMouseWorldPositionSnapped(interface.snap).y, 0, 1, 1, spritesArray[enemyIndex]:getWidth()/2, spritesArray[enemyIndex]:getHeight()/2)
 	end
 
-	love.graphics.translate(cameraPosition.x, cameraPosition.y)
+	love.graphics.translate(world.cameraPosition.x, world.cameraPosition.y)
 end
 
 function drawUI()
@@ -128,9 +125,10 @@ function drawUI()
 	love.graphics.print('Camera y:', 4 + 46 + 100, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.print('     Snap:', 4 + 2*(46 + 100),  TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
 
-	local snapPos = mousePositionSnap
+
+	local snapPos = getMouseWorldPositionSnapped(interface.snap)
 	snapPos.y = -snapPos.y
-	local mouseString = tostring(mousePositionSnap)
+	local mouseString = tostring(snapPos)
 	local _, _, p1, p2, p3 = mouseString:find('(%(%-?%d+)%.%d*(%,%-?%d+)%.%d*(%))')
 	mouseString = p1 .. p2 .. p3
 	love.graphics.print('Mouse: ' .. mouseString, love.window.getWidth() - 140, TOOLBAR_HEIGHT/2 - love.graphics.getFont():getHeight()/2)
@@ -138,7 +136,7 @@ function drawUI()
 
 	-- croshair
 	local top, bottom, left, right =
-		centerOffset+CROSSHAIR_SIZE*Vector.UP, centerOffset+CROSSHAIR_SIZE*Vector.DOWN, centerOffset+CROSSHAIR_SIZE*Vector.LEFT, centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
+		window.centerOffset+CROSSHAIR_SIZE*Vector.UP, window.centerOffset+CROSSHAIR_SIZE*Vector.DOWN, window.centerOffset+CROSSHAIR_SIZE*Vector.LEFT, window.centerOffset+CROSSHAIR_SIZE*Vector.RIGHT
 	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
 	love.graphics.line(left.x, left.y, right.x, right.y)
 end
@@ -164,8 +162,8 @@ end
 
 function love.mousepressed(x, y, button)
 	if (button == 'l') then
-		if ((mode == "place enemy") and (x < mainAreaSize.x) and (y > TOOLBAR_HEIGHT)) then
-			enemyPlaced(mousePositionSnap)
+		if ((mode == "place enemy") and (x < window.mainAreaSize.x) and (y > TOOLBAR_HEIGHT)) then
+			enemyPlaced(getMouseWorldPositionSnapped(interface.snap))
 			if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
 				mode = 'default'
 			end
@@ -272,10 +270,10 @@ function setupToolbar()
 	cameraFieldx:CenterWithinArea(46, 0, 96, TOOLBAR_HEIGHT)
 	cameraFieldx:SetFont(love.graphics.newFont(12))
 	cameraFieldx:SetEditable(true)
-	cameraFieldx:SetText(tostring(cameraPosition.x))
+	cameraFieldx:SetText(tostring(world.cameraPosition.x))
 	cameraFieldx.OnFocusGained = onFocus
 	cameraFieldx.OnEnter = function(object)
-		cameraPosition.x = tonumber(object:GetText()) - centerOffset.x
+		world.cameraPosition.x = tonumber(object:GetText()) - window.centerOffset.x
 	end
 	cameraFieldx.Update = function(object, dt)
 		if (not object:GetFocus()) then
@@ -288,10 +286,10 @@ function setupToolbar()
 	cameraFieldy:CenterWithinArea(142, 0, 192, TOOLBAR_HEIGHT)
 	cameraFieldy:SetFont(love.graphics.newFont(12))
 	cameraFieldy:SetEditable(true)
-	cameraFieldy:SetText(tostring(cameraPosition.y))
+	cameraFieldy:SetText(tostring(world.cameraPosition.y))
 	cameraFieldy.OnFocusGained = onFocus
 	cameraFieldy.OnEnter = function(object)
-		cameraPosition.y = -tonumber(object:GetText()) - centerOffset.y
+		world.cameraPosition.y = -tonumber(object:GetText()) - window.centerOffset.y
 	end
 	cameraFieldy.Update = function(object, dt)
 		if (not object:GetFocus()) then
@@ -305,10 +303,10 @@ function setupToolbar()
 	snapField:CenterWithinArea(142+96, 0, 192+96, TOOLBAR_HEIGHT)
 	snapField:SetFont(love.graphics.newFont(12))
 	snapField:SetEditable(true)
-	snapField:SetText(tostring(snapMode))
+	snapField:SetText(tostring(interface.snap))
 	snapField.OnFocusGained = onFocus
 	snapField.OnEnter = function(object)
-		snapMode = tonumber(object:GetText())
+		interface.snap = tonumber(object:GetText())
 	end
 
 	-- export button
@@ -317,7 +315,7 @@ function setupToolbar()
 	exportButton:SetText("Export Level")
 	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, TOOLBAR_HEIGHT)
 	exportButton.OnClick = function(object)
-		for index,enemy in pairs(enemyList) do
+		for index,enemy in pairs(world.enemies) do
 			output:write(enemy.path)
 		end
 	end
@@ -333,13 +331,13 @@ end
 -- OTHER
 ------------------------------------------
 function love.resize(w, h)
-	mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
-	centerOffset = mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
+	window.mainAreaSize = Vector(love.window.getWidth() - TOOLPANE_WIDTH, love.window.getHeight() - TOOLBAR_HEIGHT)
+	window.centerOffset = window.mainAreaSize/2 + Vector.DOWN*TOOLBAR_HEIGHT
 	loveframes.resize(w, h)
 	setCamCenterPos()
 	-- round to nearest one for clean non aliased graphics
-	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
-	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+	world.cameraPosition.x = roundTo(world.cameraPosition.x, 1, 'nearest')
+	world.cameraPosition.y = roundTo(world.cameraPosition.y, 1, 'nearest')
 end
 
 function cameraMovement(dt)
@@ -352,21 +350,27 @@ function cameraMovement(dt)
 		if love.keyboard.isDown('right') then dCamPos = dCamPos + Vector(1,0) end
 	end
 
-	cameraPosition = cameraPosition + dCamPos*CAMERA_SPEED * dt
+	world.cameraPosition = world.cameraPosition + dCamPos*CAMERA_SPEED * dt
 	--round values to nearest integer so there isn't any nasty aliasing of the grid
-	cameraPosition.x = roundTo(cameraPosition.x, 1, 'nearest')
-	cameraPosition.y = roundTo(cameraPosition.y, 1, 'nearest')
+	world.cameraPosition.x = roundTo(world.cameraPosition.x, 1, 'nearest')
+	world.cameraPosition.y = roundTo(world.cameraPosition.y, 1, 'nearest')
 	setCamCenterPos()
 end
 
-function setMousePosition()
-	mousePosition = Vector(love.mouse.getPosition()) + cameraPosition
-	mousePosition.y = -mousePosition.y
-	mousePositionSnap = Vector(roundTo(mousePosition.x,snapMode,'nearest'),roundTo(mousePosition.y,snapMode,'nearest'))
+function getMouseWorldPosition()
+	local result = Vector(love.mouse.getPosition()) + world.cameraPosition
+	result.y = -result.y
+	return result
+end
+
+function getMouseWorldPositionSnapped(snapX, snapY)
+	snapY = snapY or snapX
+	local result = getMouseWorldPosition()
+	return Vector(roundTo(result.x, snapX, 'nearest'), roundTo(result.y, snapY, 'nearest'))
 end
 
 function setCamCenterPos()
-	cameraCenterPos = cameraPosition + centerOffset
+	cameraCenterPos = world.cameraPosition + window.centerOffset
 	cameraCenterPos.x = roundTo(cameraCenterPos.x, 1, 'nearest')
 	cameraCenterPos.y = roundTo(cameraCenterPos.y, 1, 'nearest')
 end
@@ -395,13 +399,9 @@ function enemyPlaced(pos)
 	lines[5] = "\t\t" .. coords[2] .. "\n"
 	lines[6] = "\tend, 0\n"
 
-	table.insert(enemyList, enemy)
+	table.insert(world.enemies, enemy)
 	enemy.path = ""
 	for i, v in pairs(lines) do
 		enemy.path = enemy.path .. v
 	end
-end
-
-function loadBackground()
-
 end

@@ -20,3 +20,9 @@ function roundTo(number, interval, method)
 		end
 	end
 end
+
+-- cardinal direction constants
+Vector.UP = Vector(0,-1)
+Vector.DOWN = Vector(0,1)
+Vector.LEFT = Vector(-1,0)
+Vector.RIGHT = Vector(1,0)
