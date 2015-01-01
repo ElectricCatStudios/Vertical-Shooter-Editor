@@ -8,5 +8,5 @@ function Enemy:init(type, position, sprite)
 end
 
 function Enemy:draw()
-	love.graphics.draw(self.sprite, self.position.x, self.position.y, 0, 1, 1,self.offset.x, self.offset.y)
+	love.graphics.draw(self.sprite, self.position.x, -self.position.y, 0, 1, 1,self.offset.x, self.offset.y)
 end
