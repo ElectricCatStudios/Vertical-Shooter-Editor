@@ -29,8 +29,8 @@ function window:setupToolPane()
 	--toolpane
 	toolpane = loveframes.Create("list")
 	toolpane.resize = function(object)
-		object:SetSize(window.toolpaneWidth, love.window.getHeight() - window.toolbarHeight - 1)
-		object:SetPos(love.window.getWidth() - window.toolpaneWidth, window.toolbarHeight + 1)
+		object:SetSize(self.toolpaneWidth, love.window.getHeight() - self.toolbarHeight - 1)
+		object:SetPos(love.window.getWidth() - self.toolpaneWidth, self.toolbarHeight + 1)
 	end
 	toolpane:resize()
 	toolpane:SetPadding(5)
@@ -86,7 +86,7 @@ function window:setupToolPane()
 	-- toolbar
 	toolbar = loveframes.Create("panel")
 	toolbar.resize = function(object)
-		toolbar:SetSize(love.window.getWidth(), window.toolbarHeight)
+		toolbar:SetSize(love.window.getWidth(), self.toolbarHeight)
 	end
 	toolbar:resize()
 end
@@ -99,55 +99,55 @@ function window:setupToolbar()
 		object:SetText("")
 	end
 	-- x field
-	window.cameraFieldx = loveframes.Create("textinput")
-	window.cameraFieldx:SetWidth(50)
-	window.cameraFieldx:CenterWithinArea(46, 0, 96, window.toolbarHeight)
-	window.cameraFieldx:SetFont(love.graphics.newFont(12))
-	window.cameraFieldx:SetEditable(true)
-	window.cameraFieldx:SetText(tostring(world.cameraPosition.x))
-	window.cameraFieldx.OnFocusGained = onFocus
-	window.cameraFieldx.OnEnter = function(object)
-		world.cameraPosition.x = tonumber(object:GetText()) - window.centerOffset.x
+	self.cameraFieldx = loveframes.Create("textinput")
+	self.cameraFieldx:SetWidth(50)
+	self.cameraFieldx:CenterWithinArea(46, 0, 96, self.toolbarHeight)
+	self.cameraFieldx:SetFont(love.graphics.newFont(12))
+	self.cameraFieldx:SetEditable(true)
+	self.cameraFieldx:SetText(tostring(world.cameraPosition.x))
+	self.cameraFieldx.OnFocusGained = onFocus
+	self.cameraFieldx.OnEnter = function(object)
+		world.cameraPosition.x = tonumber(object:GetText()) - self.centerOffset.x
 	end
-	window.cameraFieldx.Update = function(object, dt)
+	self.cameraFieldx.Update = function(object, dt)
 		if (not object:GetFocus()) then
-			object:SetText(tostring(window.cameraCenterPos.x))
+			object:SetText(tostring(self.cameraCenterPos.x))
 		end
 	end
 	-- y field
-	window.cameraFieldy = loveframes.Create("textinput")
-	window.cameraFieldy:SetWidth(50)
-	window.cameraFieldy:CenterWithinArea(142, 0, 192, window.toolbarHeight)
-	window.cameraFieldy:SetFont(love.graphics.newFont(12))
-	window.cameraFieldy:SetEditable(true)
-	window.cameraFieldy:SetText(tostring(world.cameraPosition.y))
-	window.cameraFieldy.OnFocusGained = onFocus
-	window.cameraFieldy.OnEnter = function(object)
-		world.cameraPosition.y = -tonumber(object:GetText()) - window.centerOffset.y
+	self.cameraFieldy = loveframes.Create("textinput")
+	self.cameraFieldy:SetWidth(50)
+	self.cameraFieldy:CenterWithinArea(142, 0, 192, self.toolbarHeight)
+	self.cameraFieldy:SetFont(love.graphics.newFont(12))
+	self.cameraFieldy:SetEditable(true)
+	self.cameraFieldy:SetText(tostring(world.cameraPosition.y))
+	self.cameraFieldy.OnFocusGained = onFocus
+	self.cameraFieldy.OnEnter = function(object)
+		world.cameraPosition.y = -tonumber(object:GetText()) - self.centerOffset.y
 	end
-	window.cameraFieldy.Update = function(object, dt)
+	self.cameraFieldy.Update = function(object, dt)
 		if (not object:GetFocus()) then
-			object:SetText(tostring(-window.cameraCenterPos.y))
+			object:SetText(tostring(-self.cameraCenterPos.y))
 		end
 	end
 
 	-- snap field
 	local snapField = loveframes.Create("textinput")
 	snapField:SetWidth(50)
-	snapField:CenterWithinArea(142+96, 0, 192+96, window.toolbarHeight)
+	snapField:CenterWithinArea(142+96, 0, 192+96, self.toolbarHeight)
 	snapField:SetFont(love.graphics.newFont(12))
 	snapField:SetEditable(true)
-	snapField:SetText(tostring(window.snap))
+	snapField:SetText(tostring(self.snap))
 	snapField.OnFocusGained = onFocus
 	snapField.OnEnter = function(object)
-		window.snap = tonumber(object:GetText())
+		self.snap = tonumber(object:GetText())
 	end
 
 	-- export button`
 	local exportButton = loveframes.Create('button', toolbar)
 	exportButton:SetWidth(80)
 	exportButton:SetText("Export Level")
-	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, window.toolbarHeight)
+	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, self.toolbarHeight)
 	exportButton.OnClick = function(object)
 		for index,enemy in pairs(world.enemies) do
 			output:write(enemy.path)
@@ -156,7 +156,7 @@ function window:setupToolbar()
 end
 
 function window:getStageCenter()
-	local center = world.cameraPosition + window.centerOffset
+	local center = world.cameraPosition + self.centerOffset
 	center.x = roundTo(center.x, 1, 'nearest')
 	center.y = roundTo(center.y, 1, 'nearest')
 end
@@ -164,28 +164,49 @@ end
 function window:draw()
 	loveframes.draw()
 	love.graphics.setColor(0,0,0)
-	love.graphics.print('Camera x:', 4, window.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.print('Camera y:', 4 + 46 + 100, window.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
-	love.graphics.print('     Snap:', 4 + 2*(46 + 100),  window.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera x:', 4, self.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Camera y:', 4 + 46 + 100, self.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('     Snap:', 4 + 2*(46 + 100),  self.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
 
 
-	local snapPos = world:getMouseWorldPositionSnapped(window.snap)
+	local snapPos = world:getMouseWorldPositionSnapped(self.snap)
 	snapPos.y = -snapPos.y
 	local mouseString = tostring(snapPos)
 	local _, _, p1, p2, p3 = mouseString:find('(%(%-?%d+)%.%d*(%,%-?%d+)%.%d*(%))')
 	mouseString = p1 .. p2 .. p3
-	love.graphics.print('Mouse: ' .. mouseString, love.window.getWidth() - 140, window.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
+	love.graphics.print('Mouse: ' .. mouseString, love.window.getWidth() - 140, self.toolbarHeight/2 - love.graphics.getFont():getHeight()/2)
 	love.graphics.setColor(255,255,255)
 
 	-- croshair
 	local top, bottom, left, right =
-		window.centerOffset+window.crosshairSize*Vector.UP, window.centerOffset+window.crosshairSize*Vector.DOWN, window.centerOffset+window.crosshairSize*Vector.LEFT, window.centerOffset+window.crosshairSize*Vector.RIGHT
+		self.centerOffset+self.crosshairSize*Vector.UP, self.centerOffset+self.crosshairSize*Vector.DOWN, self.centerOffset+self.crosshairSize*Vector.LEFT, self.centerOffset+self.crosshairSize*Vector.RIGHT
 	love.graphics.line(top.x, top.y, bottom.x, bottom.y)
 	love.graphics.line(left.x, left.y, right.x, right.y)
 end
 
 function window:resize()
-	window.mainAreaSize = Vector(love.window.getWidth() - window.toolpaneWidth, love.window.getHeight() - window.toolbarHeight)
-	window.centerOffset = window.mainAreaSize/2 + Vector.DOWN*window.toolbarHeight
+	self.mainAreaSize = Vector(love.window.getWidth() - self.toolpaneWidth, love.window.getHeight() - self.toolbarHeight)
+	self.centerOffset = self.mainAreaSize/2 + Vector.DOWN*self.toolbarHeight
 	loveframes.resize(w, h)
+end
+
+function window:mousePressed(x, y, button)
+	if (button == 'l') then
+		if (self.mode == "place enemy") then
+			if (self:isCoordInMainArea(x, y)) then
+				enemyPlaced(world:getMouseWorldPositionSnapped(self.snap))
+				if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
+					self.mode = 'default'
+				end
+			end
+		elseif(self.mode == "default") then
+			-- TODO NEXT:
+		end
+	elseif (button == 'r') then
+		self.mode = 'default'
+	end
+end
+
+function window:isCoordInMainArea(x, y)
+	return (x < self.mainAreaSize.x) and (y > self.toolbarHeight)
 end

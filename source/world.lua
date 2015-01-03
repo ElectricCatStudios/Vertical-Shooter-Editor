@@ -68,3 +68,7 @@ function world:getMouseWorldPositionSnapped(snapX, snapY)
 	local result = self:getMouseWorldPosition()
 	return Vector(roundTo(result.x, snapX, 'nearest'), roundTo(result.y, snapY, 'nearest'))
 end
+
+function aabbEnemySelect()
+
+end

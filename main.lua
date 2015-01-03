@@ -64,17 +64,8 @@ function love.keyreleased(key, unicode)
 end
 
 function love.mousepressed(x, y, button)
-	if (button == 'l') then
-		if ((window.mode == "place enemy") and (x < window.mainAreaSize.x) and (y > window.toolbarHeight)) then
-			enemyPlaced(world:getMouseWorldPositionSnapped(window.snap))
-			if not (love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')) then
-				window.mode = 'default'
-			end
-		end
-	elseif (button == 'r') then
-		window.mode = 'default'
-	end
 	loveframes.mousepressed(x, y, button)
+	window:mousePressed(x, y, button)
 end
 
 function love.mousereleased(x, y, button)
