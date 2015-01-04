@@ -150,7 +150,7 @@ function window:setupToolbar()
 	exportButton:CenterWithinArea(love.window.getWidth() - 256, 0, 128, self.toolbarHeight)
 	exportButton.OnClick = function(object)
 		for index,enemy in pairs(world.enemies) do
-			output:write(enemy.path)
+			output:write(enemy:serialize())
 		end
 	end
 end
@@ -200,7 +200,7 @@ function window:mousePressed(x, y, button)
 				end
 			end
 		elseif(self.mode == "default") then
-			-- TODO NEXT:
+			
 		end
 	elseif (button == 'r') then
 		self.mode = 'default'

@@ -72,3 +72,35 @@ end
 function aabbEnemySelect()
 
 end
+
+function world:worldToWindowSpace(worldSpaceCoord)
+	assert(worldSpaceCoord.x and worldSpaceCoord.y and self)
+
+	local windowSpaceCoord = worldSpaceCoord - self.cameraPosition
+	return windowSpaceCoord
+end
+
+function windowToWorldSpace(windowSpaceCoord)
+	assert(windowSpaceCoord.x and windowSpaceCoord.y and self)
+
+	local worldSpaceCoord = self.cameraPosition + windowSpaceCoord
+	return worldSpaceCoord
+end
+
+function worldToWindowSpace(worldX, worldY)
+	assert(worldX and worldY and self)
+
+	local windowX = worldX - self.cameraPosition.x
+	local windowY = worldY - self.cameraPosition.y
+
+	return windowSpaceCoord
+end
+
+function windowToWorldSpace(windowX, windowY)
+	assert(windowX and windowY and self)
+
+	local worldX = self.cameraPosition.x + windowX
+	local worldY = self.cameraPosition.y + windowY
+
+	return windowSpaceCoord
+end
