@@ -4,12 +4,13 @@ world.background = love.graphics.newImage("/resources/background.png")
 world.width = world.background:getWidth()
 world.height = world.background:getHeight()
 world.enemies = {}
-world.cameraPosition = -window.centerOffset
+world.cameraPosition = Vector(0,0)---window.centerOffset
 world.gridMode = 64
 world.scrollSpeed = 250
 
 function world:draw()
-	love.graphics.translate(-world.cameraPosition.x, -world.cameraPosition.y)
+	print(self.cameraPosition)
+	love.graphics.translate(-world.cameraPosition.x, world.cameraPosition.y)
 
 	love.graphics.draw(self.background, 0, -self.height)
 	self:drawGrid()
@@ -59,7 +60,6 @@ end
 
 function world:getMouseWorldPosition()
 	local result = Vector(love.mouse.getPosition()) + world.cameraPosition
-	result.y = -result.y
 	return result
 end
 
@@ -67,40 +67,4 @@ function world:getMouseWorldPositionSnapped(snapX, snapY)
 	snapY = snapY or snapX
 	local result = self:getMouseWorldPosition()
 	return Vector(roundTo(result.x, snapX, 'nearest'), roundTo(result.y, snapY, 'nearest'))
-end
-
-function aabbEnemySelect()
-
-end
-
-function world:worldToWindowSpace(worldSpaceCoord)
-	assert(worldSpaceCoord.x and worldSpaceCoord.y and self)
-
-	local windowSpaceCoord = worldSpaceCoord - self.cameraPosition
-	return windowSpaceCoord
-end
-
-function windowToWorldSpace(windowSpaceCoord)
-	assert(windowSpaceCoord.x and windowSpaceCoord.y and self)
-
-	local worldSpaceCoord = self.cameraPosition + windowSpaceCoord
-	return worldSpaceCoord
-end
-
-function worldToWindowSpace(worldX, worldY)
-	assert(worldX and worldY and self)
-
-	local windowX = worldX - self.cameraPosition.x
-	local windowY = worldY - self.cameraPosition.y
-
-	return windowSpaceCoord
-end
-
-function windowToWorldSpace(windowX, windowY)
-	assert(windowX and windowY and self)
-
-	local worldX = self.cameraPosition.x + windowX
-	local worldY = self.cameraPosition.y + windowY
-
-	return windowSpaceCoord
 end

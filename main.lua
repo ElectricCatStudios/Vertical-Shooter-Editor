@@ -1,6 +1,5 @@
 -- TODO: Fix export buttor 
 -- TODO: Handle file io more elegantly, the program currently keeps control over output file the whole time it
--- TODO: switch game coordinate system
 -- is running
 
 -- dependencies
@@ -93,7 +92,7 @@ end
 function cameraMovement(dt)
 	local dCamPos = Vector(0,0)		-- the position delta
 
-	if (not (window.cameraFieldx:GetFocus() or window.cameraFieldy:GetFocus())) then
+	if (not (window.cameraPosFieldX:GetFocus() or window.cameraPosFieldY:GetFocus())) then
 		if love.keyboard.isDown('up') then dCamPos = dCamPos + Vector.up end
 		if love.keyboard.isDown('down') then dCamPos = dCamPos + Vector.down end
 		if love.keyboard.isDown('left') then dCamPos = dCamPos + Vector.left end
@@ -104,6 +103,8 @@ function cameraMovement(dt)
 	--round values to nearest integer so there isn't any nasty aliasing of the grid
 	world.cameraPosition.x = roundTo(world.cameraPosition.x, 1, 'nearest')
 	world.cameraPosition.y = roundTo(world.cameraPosition.y, 1, 'nearest')
+	window.cameraPosFieldX:SetText(world.cameraPosition.x + window.centerOffset.x)
+	window.cameraPosFieldY:SetText(world.cameraPosition.y + window.centerOffset.y)
 end
 
 function enemyButtonPressed(self, mouseX, mouseY)

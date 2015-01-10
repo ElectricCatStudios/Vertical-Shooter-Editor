@@ -5,15 +5,14 @@ window.toolbarHeight = 32
 window.crosshairSize = 32
 window.snap = 32
 window.enemyIndex = nil
-window.cameraCenterPos = Vector(0,0)					-- the position in global coordinates that the center of the main area is at
 window.mode = "default"
-
--- TODO: this doesn't update
-cameraFieldx, cameraFieldy = nil, nil			-- the two gui fields that display the cameras position
+window.cameraPosFieldX = nil
+window.cameraPosFieldY = nil
 
 window.mainAreaStart = Vector(0, window.toolbarHeight)
 window.mainAreaSize = Vector(love.window.getWidth() - window.toolpaneWidth, love.window.getHeight() - window.toolbarHeight)
 window.centerOffset = window.mainAreaSize/2 + Vector.DOWN*window.toolbarHeight
+window.centerOffset.y = -window.centerOffset.y
 
 function window:initUI()
 	self:setupToolPane()
@@ -99,36 +98,26 @@ function window:setupToolbar()
 		object:SetText("")
 	end
 	-- x field
-	self.cameraFieldx = loveframes.Create("textinput")
-	self.cameraFieldx:SetWidth(50)
-	self.cameraFieldx:CenterWithinArea(46, 0, 96, self.toolbarHeight)
-	self.cameraFieldx:SetFont(love.graphics.newFont(12))
-	self.cameraFieldx:SetEditable(true)
-	self.cameraFieldx:SetText(tostring(world.cameraPosition.x))
-	self.cameraFieldx.OnFocusGained = onFocus
-	self.cameraFieldx.OnEnter = function(object)
+	self.cameraPosFieldX = loveframes.Create("textinput")
+	self.cameraPosFieldX:SetWidth(50)
+	self.cameraPosFieldX:CenterWithinArea(46, 0, 96, self.toolbarHeight)
+	self.cameraPosFieldX:SetFont(love.graphics.newFont(12))
+	self.cameraPosFieldX:SetEditable(true)
+	self.cameraPosFieldX:SetText(tostring(world.cameraPosition.x))
+	self.cameraPosFieldX.OnFocusGained = onFocus
+	self.cameraPosFieldX.OnEnter = function(object)
 		world.cameraPosition.x = tonumber(object:GetText()) - self.centerOffset.x
 	end
-	self.cameraFieldx.Update = function(object, dt)
-		if (not object:GetFocus()) then
-			object:SetText(tostring(self.cameraCenterPos.x))
-		end
-	end
 	-- y field
-	self.cameraFieldy = loveframes.Create("textinput")
-	self.cameraFieldy:SetWidth(50)
-	self.cameraFieldy:CenterWithinArea(142, 0, 192, self.toolbarHeight)
-	self.cameraFieldy:SetFont(love.graphics.newFont(12))
-	self.cameraFieldy:SetEditable(true)
-	self.cameraFieldy:SetText(tostring(world.cameraPosition.y))
-	self.cameraFieldy.OnFocusGained = onFocus
-	self.cameraFieldy.OnEnter = function(object)
+	self.cameraPosFieldY = loveframes.Create("textinput")
+	self.cameraPosFieldY:SetWidth(50)
+	self.cameraPosFieldY:CenterWithinArea(142, 0, 192, self.toolbarHeight)
+	self.cameraPosFieldY:SetFont(love.graphics.newFont(12))
+	self.cameraPosFieldY:SetEditable(true)
+	self.cameraPosFieldY:SetText(tostring(world.cameraPosition.y))
+	self.cameraPosFieldY.OnFocusGained = onFocus
+	self.cameraPosFieldY.OnEnter = function(object)
 		world.cameraPosition.y = -tonumber(object:GetText()) - self.centerOffset.y
-	end
-	self.cameraFieldy.Update = function(object, dt)
-		if (not object:GetFocus()) then
-			object:SetText(tostring(-self.cameraCenterPos.y))
-		end
 	end
 
 	-- snap field
